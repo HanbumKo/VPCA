@@ -12,6 +12,8 @@ Pytorch(torch, torchvision). Pillow, OpenCV, tqdm,
 
 [JetCam](github.com/NVIDIA-AI_IOT/jetcam)
 
+[trt_pose](https://github.com/NVIDIA-AI-IOT/trt_pose)
+
 
 
 ### Usage
