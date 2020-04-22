@@ -4,6 +4,7 @@ import torch
 import trt_pose
 from PIL import Image
 
+
 class Utils():
     def __init__(self, topology):
         self.topology = topology
@@ -15,8 +16,7 @@ class Utils():
         self.line_integral_samples = 7
         self.max_num_parts = 100
         self.max_num_objects = 100
-        
-    
+
     def preprocess(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(image)
@@ -37,6 +37,9 @@ class Utils():
         topology = self.topology
         height = image.shape[0]
         width = image.shape[1]
+        # print("object_counts :", object_counts.shape)
+        # print("objects :", objects.shape)
+        # print("normalized_peaks :", normalized_peaks.shape)
         
         K = topology.shape[0]
         count = int(object_counts[0])
