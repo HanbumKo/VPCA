@@ -52,23 +52,24 @@ def load_model_and_run():
     # camera = USBCamera(width=WIDTH, height=HEIGHT, capture_fps=15)
     camera = CSICamera(width=WIDTH, height=HEIGHT, capture_fps=15)
 
-    return camera, model_trt
+    return ut, camera, model_trt
 
-    while True:
-        image = camera.read()
-        data = ut.preprocess(image)
-        cmap, paf = model_trt(data)
-        cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
-        # counts, objects, peaks = ut.parseObjects(cmap, paf)
-        counts, objects, peaks = ut.parseObjects(cmap, paf)
-        ut.drawObjects(image, counts, objects, peaks)
-        cv2.imshow("Image", image)
-        # cv2.waitKey(0)
-        if cv2.waitKey(1) & 0xFF == ord('x'):
-            break
+    # while True:
+    #     image = camera.read()
+    #     data = ut.preprocess(image)
+    #     cmap, paf = model_trt(data)
+    #     cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
+    #     # counts, objects, peaks = ut.parseObjects(cmap, paf)
+    #     counts, objects, peaks = ut.parseObjects(cmap, paf)
+    #     ut.drawObjects(image, counts, objects, peaks)
+    #     cv2.imshow("Image", image)
+    #     # cv2.waitKey(0)
+    #     if cv2.waitKey(1) & 0xFF == ord('x'):
+    #         break
 
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
-    # camera, model_trt = load_model_and_run()
-    ui = UI()
+    ut, camera, model_trt = load_model_and_run()
+    ui = UI(ut, camera, model_trt)

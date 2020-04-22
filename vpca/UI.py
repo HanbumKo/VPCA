@@ -1,8 +1,14 @@
+import cv2
+
 from tkinter import *
 
 
-class UI(object):
-    def __init__(self):
+class UI():
+    def __init__(self, ut, camera, model_trt):
+        self.camera = camera
+        self.model_trt = model_trt
+        self.ut = ut
+
         self.root = Tk()
         self.root.wm_title("VPCA")
         self.root.geometry("750x500")
@@ -29,6 +35,20 @@ class UI(object):
 
     def pose1(self):
         print("pose1 clicked")
+        while True:
+            image = self.camera.read()
+            data = self.ut.preprocess(image)
+            cmap, paf = self.model_trt(data)
+            cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
+            # counts, objects, peaks = ut.parseObjects(cmap, paf)
+            counts, objects, peaks = self.ut.parseObjects(cmap, paf)
+            self.ut.drawObjects(image, counts, objects, peaks)
+            cv2.imshow("Image", image)
+            # cv2.waitKey(0)
+            if cv2.waitKey(1) & 0xFF == ord('x'):
+                break
+
+        cv2.destroyAllWindows()
 
     def pose2(self):
         print("pose2 clicked")
