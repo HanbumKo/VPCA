@@ -44,10 +44,12 @@ class Utils():
         K = topology.shape[0]
         count = int(object_counts[0])
         K = topology.shape[0]
+        points = []
         for i in range(count):
             color = (0, 255, 0)
             obj = objects[0][i]
             C = obj.shape[0]
+            points = []
             for j in range(C):
                 k = int(obj[j])
                 if k >= 0:
@@ -55,6 +57,7 @@ class Utils():
                     x = round(float(peak[1]) * width)
                     y = round(float(peak[0]) * height)
                     cv2.circle(image, (x, y), 3, color, 2)
+                    points.append([x, y])
 
             for k in range(K):
                 c_a = topology[k][2]
@@ -67,6 +70,8 @@ class Utils():
                     x1 = round(float(peak1[1]) * width)
                     y1 = round(float(peak1[0]) * height)
                     cv2.line(image, (x0, y0), (x1, y1), color, 2)
+
+        return points
         
     def printObjects(self, image, object_counts, objects, normalized_peaks):
         topology = self.topology
