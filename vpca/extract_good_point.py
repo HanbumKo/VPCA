@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import json
 import trt_pose.coco
 import trt_pose.models
@@ -74,4 +72,25 @@ def load_model_and_run():
 
 if __name__ == "__main__":
     ut, camera, model_trt = load_model_and_run()
-    ui = UI(ut, camera, model_trt)
+    cap = cv2.VideoCapture('pose_videos/stretching_1.avi')
+
+    frame_idx = 0
+
+    while True:
+        ret, example_image = cap.read()
+        if not ret:
+            break
+        data = ut.preprocess(example_image)
+        cmap, paf = model_trt(data)
+        cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
+        # counts, objects, peaks = ut.parseObjects(cmap, paf)
+        counts, objects, peaks = ut.parseObjects(cmap, paf)
+        ut.save_point(example_image, counts, objects, peaks, frame_idx)
+        frame_idx += 1
+        cv2.imshow("Image", example_image)
+        # cv2.waitKey(0)
+        if cv2.waitKey(1) & 0xFF == ord('x'):
+            break
+
+    cv2.destroyAllWindows()
+

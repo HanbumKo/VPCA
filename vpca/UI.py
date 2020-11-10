@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from tkinter import font as tkFont
 
 from calc import *
 from tkinter import *
@@ -13,24 +14,31 @@ class UI():
 
         self.root = Tk()
         self.root.wm_title("VPCA")
-        self.root.geometry("750x500")
+        width = 1000
+        height = 333
+        scrwdth = self.root.winfo_screenwidth()
+        scrhgt = self.root.winfo_screenheight()
+        xLeft = int((scrwdth/2) - (width/2))
+        yTop = int((scrhgt/2) - (height/2))
+        self.root.geometry(str(width) + "x" + str(height) + "+" + str(xLeft) + "+" + str(yTop))
         self._make_buttons()
         self._run()
 
     def _make_buttons(self):
-        pose1 = Button(self.root, text="Deadlift", command=self.pose1)
-        pose2 = Button(self.root, text="Dumbell Shoulder Press", command=self.pose2)
-        pose3 = Button(self.root, text="Squat", command=self.pose3)
-        pose4 = Button(self.root, text="Pose4", command=self.pose4)
-        pose5 = Button(self.root, text="Pose5", command=self.pose5)
-        pose6 = Button(self.root, text="Pose6", command=self.pose6)
+        helv36 = tkFont.Font(family='Helvetica', size=36, weight=tkFont.BOLD)
+        pose1 = Button(self.root, text="Deadlift", command=self.pose1, font=helv36)
+        pose2 = Button(self.root, text="Shoulder\nPress", command=self.pose2, font=helv36)
+        pose3 = Button(self.root, text="Squat", command=self.pose3, font=helv36)
+        # pose4 = Button(self.root, text="Pose4", command=self.pose4)
+        # pose5 = Button(self.root, text="Pose5", command=self.pose5)
+        # pose6 = Button(self.root, text="Pose6", command=self.pose6)
 
-        pose1.place(x=0, y=0, width=250, height=250)
-        pose2.place(x=250, y=0, width=250, height=250)
-        pose3.place(x=500, y=0, width=250, height=250)
-        pose4.place(x=0, y=250, width=250, height=250)
-        pose5.place(x=250, y=250, width=250, height=250)
-        pose6.place(x=500, y=250, width=250, height=250)
+        pose1.place(x=0, y=0, width=333, height=333)
+        pose2.place(x=333, y=0, width=333, height=333)
+        pose3.place(x=666, y=0, width=333, height=333)
+        # pose4.place(x=0, y=250, width=250, height=250)
+        # pose5.place(x=250, y=250, width=250, height=250)
+        # pose6.place(x=500, y=250, width=250, height=250)
 
     def _run(self):
         self.root.mainloop()
@@ -53,17 +61,21 @@ class UI():
             # counts, objects, peaks = ut.parseObjects(cmap, paf)
             counts, objects, peaks = self.ut.parseObjects(cmap, paf)
             user_points = self.ut.drawObjects(user_image, counts, objects, peaks)
+            user_image = cv2.resize(user_image, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+            example_image = cv2.resize(example_image, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
             concatenated_image = np.concatenate((user_image, example_image), axis=1)
-            cv2.imshow("Image", concatenated_image)
+            cv2.namedWindow("Deadlift")        # Create a named window
+            cv2.moveWindow("Deadlift", 40,30)  # Move it to (40,30)
+            cv2.imshow("Deadlift", concatenated_image)
 
             if frame_idx in good_points_dict:
                 total_l2_distance += l2_dist(user_points, good_points_dict[frame_idx])
             
-            print(total_l2_distance)
             frame_idx += 1
             if cv2.waitKey(1) & 0xFF == ord('x'):
                 break
 
+        print("Correctness :", total_l2_distance)
         cv2.destroyAllWindows()
 
         # Feedback
@@ -71,6 +83,9 @@ class UI():
     def pose2(self):
         print("pose2 clicked")
         cap = cv2.VideoCapture('pose_videos/press.avi')
+        good_points_dict = self._load_good_points("pose_points/press.txt")
+        frame_idx = 0
+        total_l2_distance = 0
 
         while True:
             user_image = self.camera.read()
@@ -82,18 +97,32 @@ class UI():
             cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
             # counts, objects, peaks = ut.parseObjects(cmap, paf)
             counts, objects, peaks = self.ut.parseObjects(cmap, paf)
-            self.ut.drawObjects(user_image, counts, objects, peaks)
+            user_points = self.ut.drawObjects(user_image, counts, objects, peaks)
+            user_image = cv2.resize(user_image, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+            example_image = cv2.resize(example_image, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
             concatenated_image = np.concatenate((user_image, example_image), axis=1)
-            cv2.imshow("Image", concatenated_image)
-            # cv2.waitKey(0)
+            cv2.namedWindow("Shoulder Press")        # Create a named window
+            cv2.moveWindow("Shoulder Press", 40,30)  # Move it to (40,30)
+            cv2.imshow("Shoulder Press", concatenated_image)
+            
+            if frame_idx in good_points_dict:
+                total_l2_distance += l2_dist(user_points, good_points_dict[frame_idx])
+            
+            frame_idx += 1
+
             if cv2.waitKey(1) & 0xFF == ord('x'):
                 break
 
+        print("Correctness :", total_l2_distance)
         cv2.destroyAllWindows()
 
     def pose3(self):
         print("pose3 clicked")
         cap = cv2.VideoCapture('pose_videos/squat.avi')
+        good_points_dict = self._load_good_points("pose_points/squat.txt")
+        frame_idx = 0
+        total_l2_distance = 0
+        
 
         while True:
             user_image = self.camera.read()
@@ -105,23 +134,93 @@ class UI():
             cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
             # counts, objects, peaks = ut.parseObjects(cmap, paf)
             counts, objects, peaks = self.ut.parseObjects(cmap, paf)
-            self.ut.drawObjects(user_image, counts, objects, peaks)
+            user_points = self.ut.drawObjects(user_image, counts, objects, peaks)
+            user_image = cv2.resize(user_image, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+            example_image = cv2.resize(example_image, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+            concatenated_image = np.concatenate((user_image, example_image), axis=1)
+            cv2.namedWindow("Squat")        # Create a named window
+            cv2.moveWindow("Squat", 40,30)  # Move it to (40,30)
+            cv2.imshow("Squat", concatenated_image)
+
+            if frame_idx in good_points_dict:
+                total_l2_distance += l2_dist(user_points, good_points_dict[frame_idx])
+            
+            frame_idx += 1
+
+            if cv2.waitKey(1) & 0xFF == ord('x'):
+                break
+
+        print("Correctness :", total_l2_distance)
+        cv2.destroyAllWindows()
+
+    def pose4(self):
+        print("pose4 clicked")
+        cap = cv2.VideoCapture('pose_videos/stretching_1.avi')
+
+        while True:
+            user_image = self.camera.read()
+            ret, example_image = cap.read()
+            if not ret:
+                break
+            data = self.ut.preprocess(user_image)
+            cmap, paf = self.model_trt(data)
+            cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
+            # counts, objects, peaks = ut.parseObjects(cmap, paf)
+            counts, objects, peaks = self.ut.parseObjects(cmap, paf)
+            user_points = self.ut.drawObjects(user_image, counts, objects, peaks)
             concatenated_image = np.concatenate((user_image, example_image), axis=1)
             cv2.imshow("Image", concatenated_image)
-            # cv2.waitKey(0)
+
             if cv2.waitKey(1) & 0xFF == ord('x'):
                 break
 
         cv2.destroyAllWindows()
 
-    def pose4(self):
-        print("pose4 clicked")
-
     def pose5(self):
         print("pose5 clicked")
+        cap = cv2.VideoCapture('pose_videos/stretching_2.avi')
+
+        while True:
+            user_image = self.camera.read()
+            ret, example_image = cap.read()
+            if not ret:
+                break
+            data = self.ut.preprocess(user_image)
+            cmap, paf = self.model_trt(data)
+            cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
+            # counts, objects, peaks = ut.parseObjects(cmap, paf)
+            counts, objects, peaks = self.ut.parseObjects(cmap, paf)
+            user_points = self.ut.drawObjects(user_image, counts, objects, peaks)
+            concatenated_image = np.concatenate((user_image, example_image), axis=1)
+            cv2.imshow("Image", concatenated_image)
+
+            if cv2.waitKey(1) & 0xFF == ord('x'):
+                break
+
+        cv2.destroyAllWindows()
 
     def pose6(self):
         print("pose6 clicked")
+        cap = cv2.VideoCapture('pose_videos/stretching_3.avi')
+
+        while True:
+            user_image = self.camera.read()
+            ret, example_image = cap.read()
+            if not ret:
+                break
+            data = self.ut.preprocess(user_image)
+            cmap, paf = self.model_trt(data)
+            cmap, paf = cmap.detach().cpu(), paf.detach().cpu()
+            # counts, objects, peaks = ut.parseObjects(cmap, paf)
+            counts, objects, peaks = self.ut.parseObjects(cmap, paf)
+            user_points = self.ut.drawObjects(user_image, counts, objects, peaks)
+            concatenated_image = np.concatenate((user_image, example_image), axis=1)
+            cv2.imshow("Image", concatenated_image)
+
+            if cv2.waitKey(1) & 0xFF == ord('x'):
+                break
+
+        cv2.destroyAllWindows()
     
     def _parse_line(self, points_str):
         splitted = points_str.split()
