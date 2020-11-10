@@ -12,6 +12,10 @@ class UI():
         self.model_trt = model_trt
         self.ut = ut
 
+        self.pose1_set_num = 0
+        self.pose2_set_num = 0
+        self.pose3_set_num = 0
+
         self.root = Tk()
         self.root.wm_title("VPCA")
         width = 1000
@@ -44,11 +48,11 @@ class UI():
         self.root.mainloop()
 
     def pose1(self):
-        print("pose1 clicked")
         cap = cv2.VideoCapture('pose_videos/deadlift.avi')
         good_points_dict = self._load_good_points("pose_points/deadlift.txt")
         frame_idx = 0
         total_l2_distance = 0
+        self.pose1_set_num += 1
 
         while True:
             user_image = self.camera.read()
@@ -75,17 +79,26 @@ class UI():
             if cv2.waitKey(1) & 0xFF == ord('x'):
                 break
 
+        print()
+        print()
+        print("="*60)
         print("Correctness :", total_l2_distance)
+        print("You've done %d set of Deadlift!!!" % self.pose1_set_num)
+        print("You've done %d set of Shoulder Press!!!" % self.pose2_set_num)
+        print("You've done %d set of Squat!!!" % self.pose3_set_num)
+        print("="*60)
+        print()
+        print()
         cv2.destroyAllWindows()
 
         # Feedback
 
     def pose2(self):
-        print("pose2 clicked")
         cap = cv2.VideoCapture('pose_videos/press.avi')
         good_points_dict = self._load_good_points("pose_points/press.txt")
         frame_idx = 0
         total_l2_distance = 0
+        self.pose2_set_num += 1
 
         while True:
             user_image = self.camera.read()
@@ -113,16 +126,24 @@ class UI():
             if cv2.waitKey(1) & 0xFF == ord('x'):
                 break
 
+        print()
+        print()
+        print("="*60)
         print("Correctness :", total_l2_distance)
+        print("You've done %d set of Deadlift!!!" % self.pose1_set_num)
+        print("You've done %d set of Shoulder Press!!!" % self.pose2_set_num)
+        print("You've done %d set of Squat!!!" % self.pose3_set_num)
+        print("="*60)
+        print()
+        print()
         cv2.destroyAllWindows()
 
     def pose3(self):
-        print("pose3 clicked")
         cap = cv2.VideoCapture('pose_videos/squat.avi')
         good_points_dict = self._load_good_points("pose_points/squat.txt")
         frame_idx = 0
         total_l2_distance = 0
-        
+        self.pose3_set_num += 1
 
         while True:
             user_image = self.camera.read()
@@ -150,7 +171,16 @@ class UI():
             if cv2.waitKey(1) & 0xFF == ord('x'):
                 break
 
+        print()
+        print()
+        print("="*60)
         print("Correctness :", total_l2_distance)
+        print("You've done %d set of Deadlift!!!" % self.pose1_set_num)
+        print("You've done %d set of Shoulder Press!!!" % self.pose2_set_num)
+        print("You've done %d set of Squat!!!" % self.pose3_set_num)
+        print("="*60)
+        print()
+        print()
         cv2.destroyAllWindows()
 
     def pose4(self):
